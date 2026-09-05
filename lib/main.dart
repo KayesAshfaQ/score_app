@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:score_app/app/home_page.dart';
+import 'package:score_app/app/features/live_scores/pages/home_page.dart';
 import 'package:score_app/firebase_options.dart';
 
 void main() async {

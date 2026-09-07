@@ -5,6 +5,8 @@ import 'package:score_app/app/core/networks/dio_client.dart';
 import 'app/core/router/app_router.dart';
 import 'app/features/fixtures/data/fixtures_repository.dart';
 import 'app/features/fixtures/providers/fixtures_provider.dart';
+import 'app/features/match_details/data/match_detail_repository.dart';
+import 'app/features/match_details/providers/match_detail_provider.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -20,6 +22,10 @@ class App extends StatelessWidget {
           update: (_, dioClient, __) =>
               FixturesRepository(dioClient: dioClient),
         ),
+        ProxyProvider<DioClient, MatchDetailRepository>(
+          update: (_, dioClient, __) =>
+              MatchDetailRepository(dioClient: dioClient),
+        ),
 
         // Providers
         ChangeNotifierProxyProvider<FixturesRepository, FixturesProvider>(
@@ -27,6 +33,13 @@ class App extends StatelessWidget {
               FixturesProvider(repository: context.read<FixturesRepository>()),
           update: (_, repo, previous) =>
               previous ?? FixturesProvider(repository: repo),
+        ),
+        ChangeNotifierProxyProvider<MatchDetailRepository, MatchDetailProvider>(
+          create: (context) => MatchDetailProvider(
+            repository: context.read<MatchDetailRepository>(),
+          ),
+          update: (_, repo, previous) =>
+              previous ?? MatchDetailProvider(repository: repo),
         ),
       ],
       child: MaterialApp.router(

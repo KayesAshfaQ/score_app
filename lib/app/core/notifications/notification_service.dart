@@ -134,6 +134,9 @@ class NotificationService {
 
       _isInitialized = true;
       debugPrint('[NotificationService] Initialized successfully.');
+      // print fcm token
+      final token = await fcm?.getToken();
+      debugPrint('[NotificationService] FCM Token: $token');
     } catch (e, stack) {
       debugPrint('[NotificationService] Init error: $e\n$stack');
     }

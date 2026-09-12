@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../fixtures/models/match_model.dart';
+import '../../notifications/providers/notification_provider.dart';
 import '../providers/match_detail_provider.dart';
 
 class MatchDetailPage extends StatefulWidget {
@@ -32,11 +33,52 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Match Details'),
+        actions: [
+          Consumer<NotificationProvider>(
+            builder: (context, notifProvider, _) {
+              final isSubscribed = notifProvider.isMatchSubscribed(
+                widget.matchId,
+              );
+              return IconButton(
+                icon: Icon(
+                  isSubscribed
+                      ? Icons.notifications_active_rounded
+                      : Icons.notifications_none_rounded,
+                  color: isSubscribed
+                      ? AppTheme.accentBlue
+                      : AppTheme.textSecondary,
+                ),
+                tooltip: isSubscribed
+                    ? 'Turn off match alerts'
+                    : 'Turn on match alerts',
+                onPressed: () async {
+                  final enabled = await notifProvider.toggleMatchSubscription(
+                    widget.matchId,
+                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          enabled
+                              ? 'Live match alerts enabled for this fixture!'
+                              : 'Live match alerts turned off.',
+                        ),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<MatchDetailProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator(color: AppTheme.accentBlue));
+            return const Center(
+              child: CircularProgressIndicator(color: AppTheme.accentBlue),
+            );
           }
 
           if (provider.errorMessage != null) {
@@ -46,12 +88,17 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, color: AppTheme.liveRed, size: 48),
+                    const Icon(
+                      Icons.error_outline,
+                      color: AppTheme.liveRed,
+                      size: 48,
+                    ),
                     const SizedBox(height: 16),
                     Text(provider.errorMessage!, textAlign: TextAlign.center),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => provider.fetchMatchDetail(widget.matchId),
+                      onPressed: () =>
+                          provider.fetchMatchDetail(widget.matchId),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -62,7 +109,12 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
 
           final match = provider.match;
           if (match == null) {
-            return const Center(child: Text('Match not found', style: TextStyle(color: AppTheme.textSecondary)));
+            return const Center(
+              child: Text(
+                'Match not found',
+                style: TextStyle(color: AppTheme.textSecondary),
+              ),
+            );
           }
 
           return SingleChildScrollView(
@@ -141,7 +193,10 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
                   children: [
                     if (match.status.isLive)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.liveRed.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),
@@ -157,7 +212,10 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
                       )
                     else if (match.status.isFinished)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.cardBackgroundLight,
                           borderRadius: BorderRadius.circular(6),
@@ -240,8 +298,10 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
           const SizedBox(height: 12),
           const Divider(color: AppTheme.dividerColor),
           if (match.venue != null) _buildInfoRow('Venue', match.venue!),
-          if (match.matchday != null) _buildInfoRow('Matchday', 'Matchday ${match.matchday}'),
-          if (match.stage != null) _buildInfoRow('Stage', match.stage!.replaceAll('_', ' ')),
+          if (match.matchday != null)
+            _buildInfoRow('Matchday', 'Matchday ${match.matchday}'),
+          if (match.stage != null)
+            _buildInfoRow('Stage', match.stage!.replaceAll('_', ' ')),
           _buildInfoRow('Status', match.status.name.toUpperCase()),
         ],
       ),
@@ -254,8 +314,18 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
-          Text(value, style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
+          Text(
+            label,
+            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
         ],
       ),
     );
@@ -270,7 +340,8 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
       width: size,
       height: size,
       fit: BoxFit.contain,
-      errorWidget: (_, __, ___) => Icon(Icons.sports_soccer, size: size, color: AppTheme.textMuted),
+      errorWidget: (_, __, ___) =>
+          Icon(Icons.sports_soccer, size: size, color: AppTheme.textMuted),
     );
   }
 }

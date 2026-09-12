@@ -128,14 +128,20 @@ void main(List<String> args) {
           final compsWritten =
               await syncService.upsertCompetitions(competitions);
 
-          // 2. Sync standings tables for free tier leagues
+          // 2. Sync standings tables for free tier leagues with rate limit pacing (≤ 10 req/min)
           int totalStandingsWritten = 0;
           for (final code in CompetitionConstants.freeCompetitionCodes) {
-            final standings = await apiService.fetchCompetitionStandings(code);
-            if (standings.isNotEmpty) {
-              totalStandingsWritten +=
-                  await syncService.upsertStandings(code, standings);
+            try {
+              final standings = await apiService.fetchCompetitionStandings(code);
+              if (standings.isNotEmpty) {
+                totalStandingsWritten +=
+                    await syncService.upsertStandings(code, standings);
+              }
+            } catch (err) {
+              print('[sync12hStandings] Notice on $code: $err');
             }
+            // 6-second delay between leagues to strictly stay under 10 req/min
+            await Future.delayed(const Duration(seconds: 6));
           }
 
           return Response.ok(

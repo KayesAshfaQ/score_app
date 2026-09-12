@@ -1,14 +1,22 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+class CompetitionConstants {
+  static const String baseUrl = 'https://api.football-data.org/v4';
 
-class ApiConstants {
-  // static const String baseUrl = 'https://api.football-data.org/v4';
+  static const List<String> freeCompetitionCodes = [
+    'PL',
+    'ELC',
+    'BL1',
+    'PD',
+    'SA',
+    'FL1',
+    'DED',
+    'PPL',
+    'BSA',
+    'CL',
+    'EC',
+    'WC',
+  ];
 
-  static String get apiToken {
-    return dotenv.env['FOOTBALL_DATA_API_KEY'] ?? '';
-  }
-
-  // The 12 competitions available in the football-data.org free tier
-  /* static const Map<String, Map<String, String>> freeCompetitions = {
+  static const Map<String, Map<String, String>> freeCompetitions = {
     'PL': {'name': 'Premier League', 'country': 'England', 'flag': '🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
     'ELC': {'name': 'Championship', 'country': 'England', 'flag': '🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
     'BL1': {'name': 'Bundesliga', 'country': 'Germany', 'flag': '🇩🇪'},
@@ -21,5 +29,5 @@ class ApiConstants {
     'CL': {'name': 'Champions League', 'country': 'Europe', 'flag': '🇪🇺'},
     'EC': {'name': 'Euro Championship', 'country': 'Europe', 'flag': '🇪🇺'},
     'WC': {'name': 'World Cup', 'country': 'World', 'flag': '🏆'},
-  }; */
+  };
 }

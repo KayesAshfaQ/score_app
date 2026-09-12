@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/api_constants.dart';
+import 'package:shared/shared.dart';
 import '../../../core/theme/app_theme.dart';
 
 class CompetitionFilterChips extends StatelessWidget {
@@ -14,7 +14,7 @@ class CompetitionFilterChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final comps = ApiConstants.freeCompetitions;
+    final comps = CompetitionConstants.freeCompetitions;
 
     return Container(
       height: 44,

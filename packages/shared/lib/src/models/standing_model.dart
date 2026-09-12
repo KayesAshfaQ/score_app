@@ -1,4 +1,4 @@
-import 'package:shared/shared.dart';
+import 'team_brief.dart';
 
 class StandingEntry {
   final int position;
@@ -42,6 +42,20 @@ class StandingEntry {
       goalDifference: json['goalDifference'] as int? ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'position': position,
+        'team': team.toJson(),
+        'playedGames': playedGames,
+        'form': form,
+        'won': won,
+        'draw': draw,
+        'lost': lost,
+        'points': points,
+        'goalsFor': goalsFor,
+        'goalsAgainst': goalsAgainst,
+        'goalDifference': goalDifference,
+      };
 }
 
 class StandingTable {
@@ -62,11 +76,17 @@ class StandingTable {
       stage: json['stage'] as String? ?? 'REGULAR_SEASON',
       type: json['type'] as String? ?? 'TOTAL',
       group: json['group'] as String?,
-      table:
-          (json['table'] as List<dynamic>?)
+      table: (json['table'] as List<dynamic>?)
               ?.map((e) => StandingEntry.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'stage': stage,
+        'type': type,
+        'group': group,
+        'table': table.map((e) => e.toJson()).toList(),
+      };
 }

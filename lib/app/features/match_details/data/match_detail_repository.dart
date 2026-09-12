@@ -1,5 +1,6 @@
+import 'package:shared/shared.dart';
+
 import '../../../core/networks/dio_client.dart';
-import '../../fixtures/models/match_model.dart';
 
 class MatchDetailRepository {
   final DioClient dioClient;

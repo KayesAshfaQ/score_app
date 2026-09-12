@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shared/shared.dart';
 import '../data/fixtures_repository.dart';
-import '../models/competition_brief.dart';
-import '../models/match_model.dart';
 
 class FixturesProvider extends ChangeNotifier {
   final FixturesRepository repository;

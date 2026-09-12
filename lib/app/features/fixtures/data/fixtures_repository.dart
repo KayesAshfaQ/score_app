@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
+import 'package:shared/shared.dart';
 import '../../../core/networks/dio_client.dart';
-import '../models/match_model.dart';
 
 class FixturesRepository {
   final DioClient dioClient;
@@ -19,7 +19,9 @@ class FixturesRepository {
 
     // Cache check: 60s TTL for today/live dates, 10 min for past/future dates
     final isToday = _isSameDay(date, DateTime.now());
-    final ttl = isToday ? const Duration(seconds: 60) : const Duration(minutes: 10);
+    final ttl = isToday
+        ? const Duration(seconds: 60)
+        : const Duration(minutes: 10);
 
     if (!forceRefresh &&
         _cache.containsKey(dateStr) &&
@@ -36,7 +38,8 @@ class FixturesRepository {
       queryParameters: {'date': dateStr},
     );
 
-    final matchesList = (data['matches'] as List<dynamic>?)
+    final matchesList =
+        (data['matches'] as List<dynamic>?)
             ?.map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
             .toList() ??
         [];

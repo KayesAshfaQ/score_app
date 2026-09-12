@@ -1,8 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shared/shared.dart';
 import '../../../core/theme/app_theme.dart';
-import '../models/competition_brief.dart';
-import '../models/match_model.dart';
 import 'match_card.dart';
 
 class CompetitionSection extends StatefulWidget {

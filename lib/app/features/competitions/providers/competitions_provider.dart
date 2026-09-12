@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../../fixtures/models/match_model.dart';
+import 'package:shared/shared.dart';
+
 import '../data/competitions_repository.dart';
 
 class CompetitionsProvider extends ChangeNotifier {

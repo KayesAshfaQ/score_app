@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared/shared.dart';
 import '../../../core/theme/app_theme.dart';
-import '../models/match_model.dart';
 
 class MatchCard extends StatelessWidget {
   final MatchModel match;

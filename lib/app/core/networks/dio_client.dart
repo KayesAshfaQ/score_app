@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared/shared.dart';
 import '../constants/api_constants.dart';
 import 'api_exceptions.dart';
 
@@ -14,7 +15,7 @@ class DioClient {
   DioClient({String? apiToken}) {
     _dio = Dio(
       BaseOptions(
-        baseUrl: ApiConstants.baseUrl,
+        baseUrl: CompetitionConstants.baseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         headers: {

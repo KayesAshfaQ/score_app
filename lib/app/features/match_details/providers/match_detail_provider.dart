@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../../fixtures/models/match_model.dart';
+import 'package:shared/shared.dart';
 import '../data/match_detail_repository.dart';
 
 class MatchDetailProvider extends ChangeNotifier {

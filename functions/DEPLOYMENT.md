@@ -36,7 +36,7 @@ gcloud scheduler jobs create http sync-live-matches \
   --location="us-central1" \
   --schedule="* * * * *" \
   --time-zone="UTC" \
-  --uri="https://us-central1-score-app-b4eba.cloudfunctions.net/syncLiveMatches" \
+  --uri="https://synclivematches-hsrtdsvbfq-uc.a.run.app" \
   --http-method="GET" \
   --headers="x-sync-token=score_app_secure_sync_token" \
   --description="Syncs live football matches and scores every minute"
@@ -52,7 +52,7 @@ gcloud scheduler jobs create http sync-12h-standings \
   --location="us-central1" \
   --schedule="0 */12 * * *" \
   --time-zone="UTC" \
-  --uri="https://us-central1-score-app-b4eba.cloudfunctions.net/sync12hStandings" \
+  --uri="https://sync12hstandings-hsrtdsvbfq-uc.a.run.app" \
   --http-method="GET" \
   --headers="x-sync-token=score_app_secure_sync_token" \
   --description="Syncs league standings tables and competition metadata every 12 hours"
@@ -66,18 +66,18 @@ You can trigger a sync manually at any time via `curl`:
 
 ```bash
 # Health check
-curl -X GET https://us-central1-score-app-b4eba.cloudfunctions.net/healthCheck
+curl -X GET https://healthcheck-hsrtdsvbfq-uc.a.run.app
 
 # Manually trigger live matches sync for today
-curl -X GET https://us-central1-score-app-b4eba.cloudfunctions.net/syncLiveMatches \
+curl -X GET https://synclivematches-hsrtdsvbfq-uc.a.run.app \
   -H "x-sync-token: score_app_secure_sync_token"
 
-# Manually sync any specific past or future date
-curl -X GET "https://us-central1-score-app-b4eba.cloudfunctions.net/syncLiveMatches?date=2026-09-15" \
+# Manually sync tomorrow's matches
+curl -X GET https://synctomorrowmatches-hsrtdsvbfq-uc.a.run.app \
   -H "x-sync-token: score_app_secure_sync_token"
 
 # Manually trigger 12-hour standings sync
-curl -X GET https://us-central1-score-app-b4eba.cloudfunctions.net/sync12hStandings \
+curl -X GET https://sync12hstandings-hsrtdsvbfq-uc.a.run.app \
   -H "x-sync-token: score_app_secure_sync_token"
 ```
 

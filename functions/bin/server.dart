@@ -111,6 +111,7 @@ void main(List<String> args) {
     // 4. Sync Standings & Competitions (12-hour scheduled task)
     firebase.https.onRequest(
       name: 'sync12hStandings',
+      options: const HttpsOptions(timeoutSeconds: DeployOption(180)),
       (request) async {
         if (!_isAuthorized(request)) {
           return Response.forbidden(
@@ -140,8 +141,8 @@ void main(List<String> args) {
             } catch (err) {
               print('[sync12hStandings] Notice on $code: $err');
             }
-            // 6-second delay between leagues to strictly stay under 10 req/min
-            await Future.delayed(const Duration(seconds: 6));
+            // 3-second delay between leagues to strictly stay under 10 req/min
+            await Future.delayed(const Duration(seconds: 3));
           }
 
           return Response.ok(

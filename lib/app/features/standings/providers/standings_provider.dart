@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shared/shared.dart';
 import '../data/standings_repository.dart';
-import '../models/standing_model.dart';
 
 class StandingsProvider extends ChangeNotifier {
   final StandingsRepository repository;
@@ -8,6 +9,8 @@ class StandingsProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   List<StandingTable> _standings = [];
+  StreamSubscription<List<StandingTable>>? _standingsSubscription;
+  String? _currentCompetitionCode;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -15,18 +18,38 @@ class StandingsProvider extends ChangeNotifier {
 
   StandingsProvider({required this.repository});
 
-  Future<void> fetchStandings(String competitionCode) async {
+  void subscribeToStandings(String competitionCode) {
+    if (_currentCompetitionCode == competitionCode && _standings.isNotEmpty) {
+      return;
+    }
+    _currentCompetitionCode = competitionCode;
+    _standingsSubscription?.cancel();
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    try {
-      _standings = await repository.getStandings(competitionCode);
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    _standingsSubscription = repository.watchStandings(competitionCode).listen(
+      (data) {
+        _standings = data;
+        _isLoading = false;
+        _errorMessage = null;
+        notifyListeners();
+      },
+      onError: (error) {
+        _isLoading = false;
+        _errorMessage = error.toString();
+        notifyListeners();
+      },
+    );
+  }
+
+  Future<void> fetchStandings(String competitionCode) async {
+    subscribeToStandings(competitionCode);
+  }
+
+  @override
+  void dispose() {
+    _standingsSubscription?.cancel();
+    super.dispose();
   }
 }

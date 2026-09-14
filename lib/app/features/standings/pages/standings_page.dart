@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../models/standing_model.dart';
+import 'package:shared/shared.dart';
 import '../providers/standings_provider.dart';
 
 class StandingsPage extends StatefulWidget {

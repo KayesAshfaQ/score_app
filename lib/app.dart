@@ -32,13 +32,13 @@ class App extends StatelessWidget {
           update: (_, firestore, _) =>
               FixturesRepository(firestore: firestore),
         ),
-        ProxyProvider<DioClient, CompetitionsRepository>(
-          update: (_, dioClient, __) =>
-              CompetitionsRepository(dioClient: dioClient),
+        ProxyProvider<FirebaseFirestore, CompetitionsRepository>(
+          update: (_, firestore, _) =>
+              CompetitionsRepository(firestore: firestore),
         ),
-        ProxyProvider<DioClient, StandingsRepository>(
-          update: (_, dioClient, __) =>
-              StandingsRepository(dioClient: dioClient),
+        ProxyProvider<FirebaseFirestore, StandingsRepository>(
+          update: (_, firestore, _) =>
+              StandingsRepository(firestore: firestore),
         ),
         ProxyProvider<DioClient, MatchDetailRepository>(
           update: (_, dioClient, __) =>

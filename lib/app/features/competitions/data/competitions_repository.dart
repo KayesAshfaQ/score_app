@@ -1,18 +1,39 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared/shared.dart';
-import '../../../core/networks/dio_client.dart';
 
 class CompetitionsRepository {
-  final DioClient dioClient;
+  final FirebaseFirestore firestore;
 
-  CompetitionsRepository({required this.dioClient});
+  CompetitionsRepository({FirebaseFirestore? firestore})
+      : firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// Stream of matches for a specific competition code.
+  Stream<List<MatchModel>> watchCompetitionMatches(String code) {
+    return firestore
+        .collection('matches')
+        .where('competitionCode', isEqualTo: code.toUpperCase())
+        .snapshots()
+        .map((snapshot) {
+      final matches = snapshot.docs
+          .map((doc) => MatchModel.fromFirestore(doc.data()))
+          .toList();
+      matches.sort((a, b) => a.utcDate.compareTo(b.utcDate));
+      return matches;
+    });
+  }
+
+  /// One-time fetch of competition matches.
   Future<List<MatchModel>> getCompetitionMatches(String code) async {
-    final data = await dioClient.get('/competitions/$code/matches');
-    final matches =
-        (data['matches'] as List<dynamic>?)
-            ?.map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
-            .toList() ??
-        [];
+    final snapshot = await firestore
+        .collection('matches')
+        .where('competitionCode', isEqualTo: code.toUpperCase())
+        .get();
+
+    final matches = snapshot.docs
+        .map((doc) => MatchModel.fromFirestore(doc.data()))
+        .toList();
+
+    matches.sort((a, b) => a.utcDate.compareTo(b.utcDate));
     return matches;
   }
 }

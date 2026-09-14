@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:score_app/app/core/theme/app_theme.dart';
 
 import 'app/core/router/app_router.dart';
+import 'app/core/services/auth_service.dart';
+import 'app/features/auth/providers/auth_provider.dart';
 import 'app/features/competitions/data/competitions_repository.dart';
 import 'app/features/competitions/providers/competitions_provider.dart';
 import 'app/features/fixtures/data/fixtures_repository.dart';
@@ -22,6 +24,9 @@ class App extends StatelessWidget {
       providers: [
         // Core Firestore Client
         Provider<FirebaseFirestore>(create: (_) => FirebaseFirestore.instance),
+
+        // Auth
+        Provider<AuthService>(create: (_) => AuthService()),
 
         // Repositories
         ProxyProvider<FirebaseFirestore, FixturesRepository>(
@@ -42,6 +47,11 @@ class App extends StatelessWidget {
         ),
 
         // Providers
+        ChangeNotifierProxyProvider<AuthService, AuthProvider>(
+          create: (context) => AuthProvider(authService: context.read<AuthService>()),
+          update: (_, authService, previous) =>
+              previous ?? AuthProvider(authService: authService),
+        ),
         ChangeNotifierProxyProvider<FixturesRepository, FixturesProvider>(
           create: (context) =>
               FixturesProvider(repository: context.read<FixturesRepository>()),

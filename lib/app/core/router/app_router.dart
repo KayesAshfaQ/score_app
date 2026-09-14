@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/pages/sign_in_page.dart';
+import '../../features/auth/pages/sign_up_page.dart';
 import '../../features/competitions/pages/competition_detail_page.dart';
 import '../../features/fixtures/pages/fixtures_page.dart';
 import '../../features/match_details/pages/match_detail_page.dart';
@@ -10,6 +12,14 @@ class AppRouter {
     initialLocation: '/',
     routes: [
       GoRoute(path: '/', builder: (context, state) => const FixturesPage()),
+      GoRoute(
+        path: '/signin',
+        builder: (context, state) => const SignInPage(),
+      ),
+      GoRoute(
+        path: '/signup',
+        builder: (context, state) => const SignUpPage(),
+      ),
       GoRoute(
         path: '/match/:id',
         builder: (context, state) {

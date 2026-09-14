@@ -7,6 +7,7 @@ import '../providers/fixtures_provider.dart';
 import '../widgets/competition_filter_chips.dart';
 import '../widgets/competition_section.dart';
 import '../widgets/date_picker_strip.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class FixturesPage extends StatelessWidget {
   const FixturesPage({super.key});
@@ -17,6 +18,22 @@ class FixturesPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Scora'),
         actions: [
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, _) {
+              if (authProvider.isAuthenticated) {
+                return IconButton(
+                  icon: const Icon(Icons.person),
+                  onPressed: () {
+                    // Placeholder for profile/sign out
+                  },
+                );
+              }
+              return IconButton(
+                icon: const Icon(Icons.person_outline_rounded),
+                onPressed: () => context.push('/signin'),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {

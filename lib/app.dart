@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:score_app/app/core/networks/dio_client.dart';
 import 'package:score_app/app/core/theme/app_theme.dart';
 
 import 'app/core/router/app_router.dart';
@@ -24,9 +23,6 @@ class App extends StatelessWidget {
         // Core Firestore Client
         Provider<FirebaseFirestore>(create: (_) => FirebaseFirestore.instance),
 
-        // Core Network Client
-        Provider<DioClient>(create: (_) => DioClient()),
-
         // Repositories
         ProxyProvider<FirebaseFirestore, FixturesRepository>(
           update: (_, firestore, _) =>
@@ -40,9 +36,9 @@ class App extends StatelessWidget {
           update: (_, firestore, _) =>
               StandingsRepository(firestore: firestore),
         ),
-        ProxyProvider<DioClient, MatchDetailRepository>(
-          update: (_, dioClient, __) =>
-              MatchDetailRepository(dioClient: dioClient),
+        ProxyProvider<FirebaseFirestore, MatchDetailRepository>(
+          update: (_, firestore, _) =>
+              MatchDetailRepository(firestore: firestore),
         ),
 
         // Providers

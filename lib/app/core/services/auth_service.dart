@@ -30,14 +30,31 @@ class AuthService {
   /// Whether a user is currently signed in
   bool get isAuthenticated => _userId != null;
 
+  static void initGoogleSignin() {
+    unawaited(GoogleSignIn.instance.initialize());
+  }
+
   /// Sign in user using Google and authenticate with Firebase
   Future<bool> signInWithGoogle() async {
     try {
-      await _googleSignIn.initialize();
-      final result = await _googleSignIn.authenticate();
+      final googleUser = await _googleSignIn.authenticate();
 
-      _userId = result.authentication.idToken;
-      _userEmail = result.email;
+      final authorizationClient = googleUser.authorizationClient;
+      GoogleSignInClientAuthorization? authorization = await authorizationClient
+          .authorizationForScopes(['email', 'profile']);
+      final accessToken = authorization?.accessToken;
+      final idToken = googleUser.authentication.idToken;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: accessToken,
+        idToken: idToken,
+      );
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
+
+      _userId = userCredential.user?.uid;
+      _userEmail = googleUser.email;
       _authStateController.add(_userId);
       return true;
     } on FirebaseAuthException catch (e) {

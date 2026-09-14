@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 /// Core Authentication Service contract.
 /// Provides an extensible, scaffolded authentication service ready for
 /// Firebase Auth or custom backend integration.
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   String? _userId;
   String? _userEmail;
@@ -27,6 +29,32 @@ class AuthService {
 
   /// Whether a user is currently signed in
   bool get isAuthenticated => _userId != null;
+
+  /// Sign in user using Google and authenticate with Firebase
+  Future<bool> signInWithGoogle() async {
+    try {
+      await _googleSignIn.initialize();
+      final result = await _googleSignIn.authenticate();
+
+      _userId = result.authentication.idToken;
+      _userEmail = result.email;
+      _authStateController.add(_userId);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      // Handle specific error codes here
+      if (e.code == 'user-not-found') {
+        debugPrint('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        debugPrint('Wrong password provided.');
+      } else {
+        debugPrint('Error: ${e.message}');
+      }
+      return false;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
 
   /// Sign in with email and password
   Future<bool> signInWithEmailAndPassword({
@@ -106,6 +134,7 @@ class AuthService {
   /// Sign out current user
   Future<void> signOut() async {
     try {
+      await _googleSignIn.signOut();
       _auth.signOut();
 
       _userId = null;

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:score_app/app/core/networks/dio_client.dart';
@@ -20,13 +21,16 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Core Firestore Client
+        Provider<FirebaseFirestore>(create: (_) => FirebaseFirestore.instance),
+
         // Core Network Client
         Provider<DioClient>(create: (_) => DioClient()),
 
         // Repositories
-        ProxyProvider<DioClient, FixturesRepository>(
-          update: (_, dioClient, __) =>
-              FixturesRepository(dioClient: dioClient),
+        ProxyProvider<FirebaseFirestore, FixturesRepository>(
+          update: (_, firestore, _) =>
+              FixturesRepository(firestore: firestore),
         ),
         ProxyProvider<DioClient, CompetitionsRepository>(
           update: (_, dioClient, __) =>

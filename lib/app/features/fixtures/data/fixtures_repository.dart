@@ -1,57 +1,47 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:shared/shared.dart';
-import '../../../core/networks/dio_client.dart';
 
 class FixturesRepository {
-  final DioClient dioClient;
+  final FirebaseFirestore firestore;
 
-  // Simple in-memory cache to stay strictly within 10 req/min limit
-  final Map<String, List<MatchModel>> _cache = {};
-  final Map<String, DateTime> _cacheTimestamps = {};
+  FixturesRepository({FirebaseFirestore? firestore})
+      : firestore = firestore ?? FirebaseFirestore.instance;
 
-  FixturesRepository({required this.dioClient});
-
-  Future<List<MatchModel>> getMatchesByDate(
-    DateTime date, {
-    bool forceRefresh = false,
-  }) async {
+  /// Realtime stream of matches for a given date.
+  /// Automatically emits whenever Cloud Functions updates Firestore.
+  Stream<List<MatchModel>> watchMatchesByDate(DateTime date) {
     final dateStr = DateFormat('yyyy-MM-dd').format(date);
 
-    // Cache check: 60s TTL for today/live dates, 10 min for past/future dates
-    final isToday = _isSameDay(date, DateTime.now());
-    final ttl = isToday
-        ? const Duration(seconds: 60)
-        : const Duration(minutes: 10);
+    return firestore
+        .collection('matches')
+        .where('dateKey', isEqualTo: dateStr)
+        .snapshots()
+        .map((snapshot) {
+      final matches = snapshot.docs
+          .map((doc) => MatchModel.fromFirestore(doc.data()))
+          .toList();
 
-    if (!forceRefresh &&
-        _cache.containsKey(dateStr) &&
-        _cacheTimestamps.containsKey(dateStr)) {
-      final cachedAt = _cacheTimestamps[dateStr]!;
-      if (DateTime.now().difference(cachedAt) < ttl) {
-        return _cache[dateStr]!;
-      }
-    }
-
-    // Call API: GET /v4/matches?date=YYYY-MM-DD
-    final data = await dioClient.get(
-      '/matches',
-      queryParameters: {'date': dateStr},
-    );
-
-    final matchesList =
-        (data['matches'] as List<dynamic>?)
-            ?.map((json) => MatchModel.fromJson(json as Map<String, dynamic>))
-            .toList() ??
-        [];
-
-    // Store in cache
-    _cache[dateStr] = matchesList;
-    _cacheTimestamps[dateStr] = DateTime.now();
-
-    return matchesList;
+      // Sort client-side by utcDate so no composite index is strictly required
+      matches.sort((a, b) => a.utcDate.compareTo(b.utcDate));
+      return matches;
+    });
   }
 
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
+  /// One-time fetch of matches for a given date.
+  Future<List<MatchModel>> getMatchesByDate(DateTime date) async {
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+    final snapshot = await firestore
+        .collection('matches')
+        .where('dateKey', isEqualTo: dateStr)
+        .get();
+
+    final matches = snapshot.docs
+        .map((doc) => MatchModel.fromFirestore(doc.data()))
+        .toList();
+
+    matches.sort((a, b) => a.utcDate.compareTo(b.utcDate));
+    return matches;
   }
 }

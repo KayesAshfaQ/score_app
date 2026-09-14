@@ -10,7 +10,7 @@ class FixturesProvider extends ChangeNotifier {
   String? _selectedCompetitionCode; // null means "All"
   bool _isLoading = false;
   String? _errorMessage;
-  Timer? _autoRefreshTimer;
+  StreamSubscription<List<MatchModel>>? _matchesSubscription;
 
   List<MatchModel> _allMatches = [];
   Map<CompetitionBrief, List<MatchModel>> _groupedMatches = {};
@@ -25,33 +25,40 @@ class FixturesProvider extends ChangeNotifier {
   bool get hasLiveMatches => _allMatches.any((m) => m.status.isLive);
 
   FixturesProvider({required this.repository}) {
-    fetchMatches();
+    subscribeToMatches();
   }
 
-  Future<void> fetchMatches({bool forceRefresh = false}) async {
+  void subscribeToMatches() {
+    _matchesSubscription?.cancel();
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    try {
-      _allMatches = await repository.getMatchesByDate(
-        _selectedDate,
-        forceRefresh: forceRefresh,
-      );
-      _updateGroupedMatches();
-      _setupAutoRefreshTimer();
-    } catch (e) {
-      _errorMessage = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    _matchesSubscription = repository.watchMatchesByDate(_selectedDate).listen(
+      (matches) {
+        _allMatches = matches;
+        _isLoading = false;
+        _errorMessage = null;
+        _updateGroupedMatches();
+        notifyListeners();
+      },
+      onError: (error) {
+        _isLoading = false;
+        _errorMessage = error.toString();
+        notifyListeners();
+      },
+    );
+  }
+
+  Future<void> fetchMatches({bool forceRefresh = false}) async {
+    // Re-subscribe or fetch fresh snapshot
+    subscribeToMatches();
   }
 
   void selectDate(DateTime date) {
     if (_isSameDay(_selectedDate, date)) return;
     _selectedDate = date;
-    fetchMatches();
+    subscribeToMatches();
   }
 
   void selectCompetition(String? code) {
@@ -82,23 +89,13 @@ class FixturesProvider extends ChangeNotifier {
     _groupedMatches = grouped;
   }
 
-  void _setupAutoRefreshTimer() {
-    _autoRefreshTimer?.cancel();
-    // Only auto-refresh if looking at today and there are live matches
-    if (_isSameDay(_selectedDate, DateTime.now()) && hasLiveMatches) {
-      _autoRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
-        fetchMatches(forceRefresh: true);
-      });
-    }
-  }
-
   bool _isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   @override
   void dispose() {
-    _autoRefreshTimer?.cancel();
+    _matchesSubscription?.cancel();
     super.dispose();
   }
 }

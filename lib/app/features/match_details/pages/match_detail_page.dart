@@ -340,7 +340,7 @@ class _MatchDetailPageState extends State<MatchDetailPage> {
       width: size,
       height: size,
       fit: BoxFit.contain,
-      errorWidget: (_, __, ___) =>
+      errorWidget: (_, _, _) =>
           Icon(Icons.sports_soccer, size: size, color: AppTheme.textMuted),
     );
   }

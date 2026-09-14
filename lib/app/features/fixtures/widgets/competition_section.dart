@@ -111,7 +111,7 @@ class _CompetitionSectionState extends State<CompetitionSection> {
       width: 20,
       height: 20,
       fit: BoxFit.contain,
-      errorWidget: (_, __, ___) =>
+      errorWidget: (_, _, _) =>
           const Icon(Icons.emoji_events, size: 20, color: AppTheme.accentBlue),
     );
   }

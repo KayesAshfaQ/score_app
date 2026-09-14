@@ -148,7 +148,7 @@ class _StandingsPageState extends State<StandingsPage> {
                           imageUrl: entry.team.crest!,
                           width: 18,
                           height: 18,
-                          errorWidget: (_, __, ___) => const SizedBox(width: 18),
+                          errorWidget: (_, _, _) => const SizedBox(width: 18),
                         )
                       else
                         const SizedBox(width: 18),

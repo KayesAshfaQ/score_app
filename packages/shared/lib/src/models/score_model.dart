@@ -43,6 +43,17 @@ class ScoreModel {
     );
   }
 
+  factory ScoreModel.fromFirestore(Map<String, dynamic> json) {
+    final home = json['homeScore'] as int?;
+    final away = json['awayScore'] as int?;
+    return ScoreModel(
+      winner: json['winner'] as String?,
+      duration: 'REGULAR',
+      fullTime: ScoreTime(home: home, away: away),
+      halfTime: ScoreTime(),
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'winner': winner,
         'duration': duration,

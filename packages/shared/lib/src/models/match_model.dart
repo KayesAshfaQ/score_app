@@ -83,7 +83,7 @@ class MatchModel {
       competition: CompetitionBrief.fromJson(
         json['competition'] as Map<String, dynamic>? ?? {},
       ),
-      utcDate: DateTime.parse(json['utcDate'] as String? ?? DateTime.now().toIso8601String()),
+      utcDate: _parseDateTime(json['utcDate']),
       status: MatchStatus.fromString(json['status'] as String?),
       minute: json['minute'] as int?,
       matchday: json['matchday'] as int?,
@@ -94,6 +94,53 @@ class MatchModel {
       awayTeam: TeamBrief.fromJson(json['awayTeam'] as Map<String, dynamic>? ?? {}),
       score: ScoreModel.fromJson(json['score'] as Map<String, dynamic>?),
     );
+  }
+
+  factory MatchModel.fromFirestore(Map<String, dynamic> json) {
+    return MatchModel(
+      id: json['id'] as int? ?? 0,
+      competition: CompetitionBrief(
+        id: json['competitionId'] as int? ?? 0,
+        name: json['competitionName'] as String? ?? 'League',
+        code: json['competitionCode'] as String? ?? 'UNK',
+        emblem: json['competitionEmblem'] as String?,
+      ),
+      utcDate: _parseDateTime(json['utcDate']),
+      status: MatchStatus.fromString(json['status'] as String?),
+      minute: json['minute'] as int?,
+      matchday: json['matchday'] as int?,
+      stage: json['stage'] as String?,
+      group: json['group'] as String?,
+      venue: json['venue'] as String?,
+      homeTeam: TeamBrief(
+        id: json['homeTeamId'] as int? ?? 0,
+        name: json['homeTeamName'] as String? ?? 'Home',
+        shortName: json['homeTeamShortName'] as String?,
+        crest: json['homeTeamCrest'] as String?,
+      ),
+      awayTeam: TeamBrief(
+        id: json['awayTeamId'] as int? ?? 0,
+        name: json['awayTeamName'] as String? ?? 'Away',
+        shortName: json['awayTeamShortName'] as String?,
+        crest: json['awayTeamCrest'] as String?,
+      ),
+      score: ScoreModel.fromFirestore(json),
+    );
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is DateTime) return value;
+    try {
+      final dynamic dynamicVal = value;
+      if (dynamicVal.toDate is Function) {
+        return dynamicVal.toDate() as DateTime;
+      }
+    } catch (_) {}
+    if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.now();
+    }
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() => {

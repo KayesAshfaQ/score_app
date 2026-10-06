@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.score_app"
+    namespace = "dev.solobit.khelaghor"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

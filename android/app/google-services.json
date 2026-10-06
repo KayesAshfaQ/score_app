@@ -12,7 +12,20 @@
           "package_name": "com.example.score_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "903049174955-k3c3o09l2icsrakcb5ad9t1udfhtgee1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.score_app",
+            "certificate_hash": "3369020e0f36ec33abdf1f452ba7ea6fc51fe5c3"
+          }
+        },
+        {
+          "client_id": "903049174955-pau47qjm9i1174vb754ot33l0i4u30sh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAAzY9HxopimQ-OndGnRtNDN809H9Q_1P8"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903049174955-pau47qjm9i1174vb754ot33l0i4u30sh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "903049174955-mq9vm0o52tgvjio2k38a53ont1kl3qik.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.scoreApp"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,0 +1,10 @@
+# Dart build and cache artifacts
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# Firebase logs
+firebase-debug.log
+firebase-debug.*.log
+*.local.env

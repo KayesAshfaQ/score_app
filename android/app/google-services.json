@@ -48,6 +48,42 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903049174955:android:5462e0543108faa97b7cee",
+        "android_client_info": {
+          "package_name": "dev.solobit.khelaghor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903049174955-pau47qjm9i1174vb754ot33l0i4u30sh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAzY9HxopimQ-OndGnRtNDN809H9Q_1P8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903049174955-pau47qjm9i1174vb754ot33l0i4u30sh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "903049174955-mq9vm0o52tgvjio2k38a53ont1kl3qik.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.scoreApp"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

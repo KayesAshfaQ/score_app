@@ -1,0 +1,95 @@
+# Manual delivery only: no automatic triggering block.
+workflows:
+  ios-testflight:
+    name: Score App iOS Release
+    instance_type: mac_mini_m2
+    max_build_duration: 90
+
+    integrations:
+      # Must match the App Store Connect API key name in Codemagic Team integrations.
+      app_store_connect: My App Store Connect Key
+
+    environment:
+      flutter: '3.47.2'
+      xcode: '27.0'
+      cocoapods: default
+      groups:
+        # Create this group with a secret FOOTBALL_DATA_API_KEY variable.
+        - score_app_release
+      vars:
+        # Increase this if App Store Connect already contains a higher build number.
+        IOS_BUILD_NUMBER_OFFSET: 2
+      ios_signing:
+        distribution_type: app_store
+        # Upload matching Apple Distribution certificate and App Store profile
+        # for team 4WAW7Z9AA2 in Codemagic Code signing identities.
+        bundle_identifier: com.example.scoreApp
+
+    scripts:
+      - name: Show build tool versions
+        script: |
+          set -euo pipefail
+          flutter --version
+          xcodebuild -version
+
+      - name: Create release environment asset
+        script: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          api_key = os.environ.get("FOOTBALL_DATA_API_KEY", "")
+          if not api_key or any(char in api_key for char in "\r\n"):
+              raise SystemExit("FOOTBALL_DATA_API_KEY must be configured as a non-empty, single-line secret")
+          os.umask(0o077)
+          Path(".env").write_text(f"FOOTBALL_DATA_API_KEY={api_key}\n", encoding="utf-8")
+          PY
+
+      - name: Install the Xcode Metal Toolchain
+        script: |
+          set -euo pipefail
+          xcodebuild -downloadComponent MetalToolchain
+
+      - name: Get Flutter packages
+        script: |
+          set -euo pipefail
+          flutter pub get
+
+      # Native plugins use Swift Package Manager; Flutter resolves them during build.
+      - name: Analyze Flutter app and shared library
+        script: |
+          set -euo pipefail
+          flutter analyze --no-pub lib test
+          flutter analyze --no-pub packages/shared/lib
+
+      - name: Apply signing profiles to the Xcode project
+        script: |
+          set -euo pipefail
+          xcode-project use-profiles
+
+      - name: Build signed release IPA
+        script: |
+          set -euo pipefail
+          : "${PROJECT_BUILD_NUMBER:?Codemagic project build number is required}"
+          if ! [[ "$PROJECT_BUILD_NUMBER" =~ ^[0-9]+$ && "$IOS_BUILD_NUMBER_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "Build number and offset must be non-negative integers" >&2
+            exit 1
+          fi
+          IOS_BUILD_NUMBER=$((10#$PROJECT_BUILD_NUMBER + 10#$IOS_BUILD_NUMBER_OFFSET))
+          test -f "$HOME/export_options.plist"
+          flutter build ipa --release --no-pub \
+            --build-number="$IOS_BUILD_NUMBER" \
+            --export-options-plist="$HOME/export_options.plist"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/archive/*.xcarchive/dSYMs/*.dSYM
+      - /tmp/xcodebuild_logs/*.log
+
+    # Preserve App Store Connect upload without automatic beta or store submission.
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: false
+        submit_to_app_store: false

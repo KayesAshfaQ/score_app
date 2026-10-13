@@ -1,0 +1,98 @@
+name: Flutter iOS Device Build Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, ios-support]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select the newest installed stable Xcode 26
+        run: |
+          XCODE_PATH=$(python3 - <<'PY'
+          import pathlib
+          import re
+          import sys
+
+          candidates = []
+          for path in pathlib.Path('/Applications').glob('Xcode_26*.app'):
+              match = re.fullmatch(r'Xcode_(26(?:\.\d+)*)\.app', path.name)
+              if match:
+                  version = tuple(int(part) for part in match[1].split('.'))
+                  candidates.append((version, path))
+          if not candidates:
+              print('::error::No stable Xcode 26 installation found', file=sys.stderr)
+              sys.exit(1)
+          print(max(candidates)[1] / 'Contents/Developer')
+          PY
+          )
+          sudo xcode-select --switch "$XCODE_PATH"
+          xcodebuild -version
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.2'
+          channel: stable
+          cache: true
+
+      # Required by pubspec.yaml, but intentionally excluded from Git.
+      # A placeholder allows pull requests to build without repository secrets.
+      - name: Create CI environment asset
+        run: printf 'FOOTBALL_DATA_API_KEY=ci-placeholder\n' > .env
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # The app uses Swift Package Manager; Flutter resolves native plugins.
+      # Scope analysis to the app and shared library, excluding functions/.
+      - name: Analyze Flutter app and shared library
+        run: |
+          flutter analyze --no-pub lib test
+          flutter analyze --no-pub packages/shared/lib
+
+      # This compiles for physical devices, but requires signing to install.
+      - name: Build iOS device release without signing
+        run: flutter build ios --release --no-codesign --no-pub
+
+      # Archive the bundle to preserve its executable permissions and symlinks.
+      - name: Archive unsigned device app
+        run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app build/ios/score-app-ios-unsigned.zip
+
+      - name: Upload unsigned device app
+        uses: actions/upload-artifact@v4
+        with:
+          name: score-app-ios-unsigned
+          path: build/ios/score-app-ios-unsigned.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Explain device installation requirements
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ### iOS device build
+          Compiled a release app for physical iOS devices (iOS 15+).
+          The artifact is unsigned and cannot be installed directly on an iPhone.
+          Device installation requires an Apple signing certificate and a matching
+          provisioning profile for `com.example.scoreApp` (team `4WAW7Z9AA2`).
+          This build uses a placeholder football API key; live data needs a real key.
+          EOF
